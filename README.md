@@ -27,6 +27,8 @@ Nodes
 `status-node`: Reads the Mainframe's opening status and signals it via
     non-SPI RGB LED's (or stripes)
 
+`ds18b20-node`: Reads temperature from ds18b20 sensors.
+
 Create new nodes
 ----------------
 
