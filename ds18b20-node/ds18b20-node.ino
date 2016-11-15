@@ -34,10 +34,6 @@ OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature DS18B20(&oneWire);
 
 
-// Define sensors here. For example:
-// DHT dht11(D3, DHT11);
-// <------------>
-
 void setup() {
     Serial.begin(115200);
     delay(100);
@@ -76,25 +72,11 @@ bool measureAndPublish() {
 
     // <------------>
     DS18B20.requestTemperatures();
-    float temp = DS18B20.getTempCByIndex(0);
-    client.publish(mqttSensorTopic, String(temp, 1).c_str(), true);
+    float temp = (DS18B20.getTempCByIndex(0)*1000)+273150;
+    //int tempInt = temp
+    // Send to MQTT as float with no decimal.o
+    client.publish(mqttSensorTopic, String(temp, 0).c_str(), true);
     return true;
-    // Example function:
-
-    // float t = dht11.readTemperature();
-
-    // if (isnan(t)) {
-    //     Serial.print("[DHT11] no temperature or humidity\n");
-    //     return false;
-    // }
-
-    // Serial.print("[DHT11]");
-    // Serial.println(t);
-
-    // // Send to MQTT as float with 1 decimal.
-    // client.publish(mqttSensorTopic, String(t, 1).c_str());
-
-    // return true;
 }
 
 unsigned long lastUpdate = 0;
