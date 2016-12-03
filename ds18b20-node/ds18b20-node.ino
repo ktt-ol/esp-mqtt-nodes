@@ -19,6 +19,8 @@
 #include <PubSubClient.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include <DHT.h>
+
 
 #include "settings.h"
 #include "credentials.h"
@@ -33,6 +35,13 @@ PubSubClient client(mqttHost, mqttPort, wclient);
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature DS18B20(&oneWire);
 
+//#define ONE_WIRE_BUS2 12
+
+//OneWire oneWire2(ONE_WIRE_BUS2);
+//DallasTemperature DS18B202(&oneWire2);
+
+#define DHT_22_PORT 5
+DHT dht22(DHT_22_PORT, DHT22);
 
 void setup() {
     Serial.begin(115200);
@@ -43,6 +52,9 @@ void setup() {
     // Initialize sensors. For example:
     // dht11.begin();
     // <------------>
+    DS18B20.begin();
+    //DS18B202.begin();
+    dht22.begin();
 
     // Add wifi networks. wifiMulti supports multiple networks.
     // and retries to connect to all of them until it succeeds.
@@ -73,9 +85,20 @@ bool measureAndPublish() {
     // <------------>
     DS18B20.requestTemperatures();
     float temp = (DS18B20.getTempCByIndex(0)*1000)+273150;
-    //int tempInt = temp
     // Send to MQTT as float with no decimal.o
-    client.publish(mqttSensorTopic, String(temp, 0).c_str(), true);
+    if(temp>218150){
+      client.publish(mqttSensorTopic, String(temp, 0).c_str(), true);
+    }else {
+      Serial.print("Sensor Error");
+    }
+    //DS18B202.requestTemperatures();
+    //float temp2 = (DS18B202.getTempCByIndex(0)*1000)+273150;
+    //client.publish(mqttSensorTopic2, String(temp2, 0).c_str(), true);
+
+    float temp3 = dht22.readTemperature()*1000+273150;
+    float hum3 = dht22.readHumidity()*10;
+    client.publish(mqttSensorTopic3, String(temp3, 0).c_str(), true);
+    client.publish(mqttSensorTopic4, String(hum3, 0).c_str(), true);
     return true;
 }
 
